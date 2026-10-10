@@ -23,6 +23,24 @@ import static java.util.Collections.enumeration
 
 class GradleApiSpecAggregatorTest extends Specification {
 
+    def "returns an empty spec when no providers are reachable"() {
+        given:
+        def classLoader = Mock(ClassLoader)
+        1 * classLoader.getResources("META-INF/services/${GradleApiSpecProvider.class.name}") >> resources()
+
+        def subject = new GradleApiSpecAggregator(classLoader, DirectInstantiator.INSTANCE)
+
+        when:
+        def aggregate = subject.aggregate()
+
+        then:
+        aggregate.exportedClasses.isEmpty()
+        aggregate.exportedPackages.isEmpty()
+        aggregate.exportedResources.isEmpty()
+        aggregate.exportedResourcePrefixes.isEmpty()
+        aggregate.unexportedPackages.isEmpty()
+    }
+
     def "will aggregate specs from all reachable GradleApiSpecProviders"() {
         given:
         def classLoader = Mock(ClassLoader)
